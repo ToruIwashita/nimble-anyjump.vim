@@ -52,7 +52,7 @@ fun! s:open_browser(url)
 endf
 
 fun! s:url_jump_by_cursor_line()
-  let l:url = matchstr(getline('.'), '[a-z]*:\/\/[^ >,;:]*')
+  let l:url = matchstr(getline('.'), '[a-z]*:\/\/[^ )\]}>,;:]*')
 
   if !s:open_browser(l:url)
     return 0
@@ -63,7 +63,7 @@ fun! s:url_jump_by_cursor_line()
 endf
 
 fun! s:url_jump_by_specified_text(text)
-  let l:url = matchstr(a:text, '[a-z]*:\/\/[^ >,;:]*')
+  let l:url = matchstr(a:text, '[a-z]*:\/\/[^ )\]}>,;:]*')
 
   if !s:open_browser(l:url)
     return 0
