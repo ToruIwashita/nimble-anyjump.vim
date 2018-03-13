@@ -1,0 +1,105 @@
+*nimble-anyjump.txt*	タグジャンプ、ファイルやURLオープンを共通コマンドで行う
+
+Version: 1.0.0
+Author: ToruIwashita <toru.iwashita@gmail.com>
+License: MIT License
+
+==============================================================================
+						*nimble-anyjump-contents*
+目次
+
+概要						|nimble-anyjump-introduction|
+インターフェース				|nimble-anyjump-interface|
+  コマンド					|nimble-anyjump-commnads|
+  キーマッピング				|nimble-anyjump-key-mappings|
+オプション					|nimble-anyjump-options|
+  変数						|nimble-anyjump-variables|
+
+==============================================================================
+						*nimble-anyjump-introduction*
+概要
+
+*nimble-anyjump*はカーソル上の文字列やカーソルラインの文字列に応じて、
+タグジャンプ、ファイルオープン、ブラウザでのURLオープンを行うプラグインです。
+
+==============================================================================
+						*nimble-anyjump-interface*
+インターフェース
+
+------------------------------------------------------------------------------
+						*nimble-anyjump-commnads*
+コマンド
+
+							*:NimbleAnyjump*
+:NimbleAnyjump
+	カーソル上の文字列がタグだった場合タグジャンプを行い、ファイルパス
+	だった場合はファイルを開きます。タグジャンプやファイルオープンに該当
+	しなかった時にカーソルライン上にURLがあった場合、ブラウザでURLを開き
+	ます。
+	※ 現在URLを開く機能はmacOSと一部のlinux環境でのみ動作します。
+
+							*:NimbleTAnyjump*
+:NimbleTAnyjump
+	タグの候補が複数ある場合、タグをリスト表示する。
+	その他の動作はNimbleAnyjumpと同じ。
+
+							*:NimbleAnyjumpRange*
+:NimbleAnyjumpRange
+	範囲指定された文字列を対象にNimbleAnyjumpを実行する。
+
+							*:NimbleTAnyjumpRange*
+:NimbleTAnyjumpRange
+	範囲指定された文字列を対象にNimbleTAnyjumpを実行する。
+
+------------------------------------------------------------------------------
+キーマッピング					*nimble-anyjump-key-mappings*
+
+設定例
+
+>
+  nmap <leader>l <Plug>(nimble-anyjump)
+  nmap <leader>L <Plug>(nimble-t-anyjump)
+  vmap <leader>l <Plug>(nimble-anyjump-range)
+  vmap <leader>L <Plug>(nimble-t-anyjump-range)
+<
+
+<Plug>(nimble-anyjump)				*<Plug>(nimble-anyjump)*
+	NimbleAnyjumpコマンドと同等の動作をする
+
+<Plug>(nimble-t-anyjump)			*<Plug>(nimble-t-anyjump)*
+	NimbleTAnyjumpコマンドと同等の動作をする
+
+<Plug>(nimble-anyjump-range)			*<Plug>(nimble-anyjump-range)*
+	NimbleAnyjumpRangeコマンドと同等の動作をする
+
+<Plug>(nimble-t-anyjump-range)		*<Plug>(nimble-t-anyjump-range)*
+	NimbleTAnyjumpRangeコマンドと同等の動作をする
+
+==============================================================================
+						*nimble-anyjump-options*
+オプション
+
+------------------------------------------------------------------------------
+						*nimble-anyjump-variables*
+変数
+
+						*g:nimble_anyjump_output_style*
+g:nimble_anyjump_output_style
+	タグジャンプ、ファイルオープン時のファイルの表示方法。
+	 - 'vertical': ウィンドウ縦分割で開く
+	 - 'horizontal': ウィンドウ横分割で開く
+	 - 'tab': 新しいタブで開く
+Default: >
+	g:nimble_anyjump_output_style = 'vertical'
+
+						*g:nimble_anyjump_after_jump*
+g:nimble_anyjump_after_jump
+	タグジャンプ、ファイルオープン時のカーソル行の表示位置。
+	 - 'zt': カーソル行を画面の先頭に表示
+	 - 'zz': カーソル行を画面の中央に表示
+	 - 'zb': カーソル行を画面の最後に表示
+Default: >
+	g:nimble_anyjump_after_jump = 'zz'
+
+==============================================================================
+vim:tw=78:sw=4:ts=8:ft=help:norl:noet:
