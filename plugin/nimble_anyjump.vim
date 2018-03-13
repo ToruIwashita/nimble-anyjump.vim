@@ -15,10 +15,10 @@ command! NimbleTAnyjump call nimble_anyjump#anyjump('tjump')
 command! -range NimbleAnyjumpRange call nimble_anyjump#anyjump_range('tag')
 command! -range NimbleTAnyjumpRange call nimble_anyjump#anyjump_range('tjump')
 
-noremap <silent><Plug>NimbleAnyjump :<C-u>NimbleAnyjump<CR>
-noremap <silent><Plug>NimbleTAnyjump :<C-u>NimbleTAnyjump<CR>
-vnoremap <silent><Plug>NimbleAnyjumpRange :<C-u>NimbleAnyjumpRange<CR>
-vnoremap <silent><Plug>NimbleTAnyjumpRange :<C-u>NimbleTAnyjumpRange<CR>
+noremap <silent><Plug>(nimble-anyjump) :<C-u>NimbleAnyjump<CR>
+noremap <silent><Plug>(nimble-t-anyjump) :<C-u>NimbleTAnyjump<CR>
+vnoremap <silent><Plug>(nimble-anyjump-range) :<C-u>NimbleAnyjumpRange<CR>
+vnoremap <silent><Plug>(nimble-t-anyjump-range) :<C-u>NimbleTAnyjumpRange<CR>
 
 let &cpoptions = s:cpoptions_save
 unlet s:cpoptions_save
