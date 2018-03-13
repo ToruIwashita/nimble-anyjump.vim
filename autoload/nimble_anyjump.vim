@@ -74,7 +74,7 @@ fun! s:url_jump_by_specified_text(text)
 endf
 
 fun! s:open_file(file_path,line_number)
-  if empty(a:file_path) || !filereadable(a:file_path)
+  if empty(a:file_path) || !filereadable(expand(a:file_path))
     return 0
   endif
 
@@ -93,7 +93,7 @@ endf
 fun! s:file_jump_by_cursor_file()
   let l:file_path = expand('<cfile>')
   let l:space_separated_keyword = expand('<cWORD>')
-  let l:after_colon_text = matchstr(l:space_separated_keyword, l:file_path.':\zs\([0-9]*\)\ze', 0)
+  let l:after_colon_text = matchstr(expand(l:space_separated_keyword), expand(l:file_path).':\zs\([0-9]*\)\ze', 0)
 
   if empty(l:after_colon_text)
     let l:line_number = 1
@@ -109,8 +109,8 @@ fun! s:file_jump_by_cursor_file()
 endf
 
 fun! s:file_jump_by_specified_text(text)
-  let l:file_path = matchstr(a:text, '\zs\([^:]*\)\ze:\?')
-  let l:after_colon_text = matchstr(a:text, ':\zs\([0-9]*\)\ze', 0)
+  let l:file_path = matchstr(expand(a:text), '\zs\([^:]*\)\ze:\?')
+  let l:after_colon_text = matchstr(expand(a:text), ':\zs\([0-9]*\)\ze', 0)
 
   if empty(l:after_colon_text)
     let l:line_number = 1
