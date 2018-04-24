@@ -141,7 +141,7 @@ endf
 
 fun! nimble_anyjump#anyjump(cmd)
   let l:keyword = expand('<cword>')
-  let l:buffer_filepath = expand('%:p')
+  let l:buffer_file_path = expand('%:p')
   let l:taglist_length = len(taglist('^'.l:keyword.'$'))
 
   if s:file_jump_by_cursor_file()
@@ -163,7 +163,7 @@ fun! nimble_anyjump#anyjump(cmd)
     execute a:cmd.' '.l:keyword
     execute 'normal! '.s:after_jump()
   finally
-    if a:cmd ==# 'tjump' && l:buffer_filepath == expand('%:p')
+    if a:cmd ==# 'tjump' && l:buffer_file_path == expand('%:p')
       quit
       if s:output_style() ==# 'tabnew' | tabp | en
     endif
@@ -176,7 +176,7 @@ fun! nimble_anyjump#anyjump(cmd)
 endf
 
 fun! nimble_anyjump#anyjump_range(cmd) range
-  let l:buffer_filepath = expand('%:p')
+  let l:buffer_file_path = expand('%:p')
   let l:unnamed_register = @@
   silent! normal! gvy
   let l:selected_range = @@
@@ -211,7 +211,7 @@ fun! nimble_anyjump#anyjump_range(cmd) range
     execute a:cmd.' '.l:escapted_selected_range
     execute 'normal! '.s:after_jump()
   finally
-    if a:cmd ==# 'tjump' && l:buffer_filepath ==# expand('%:p')
+    if a:cmd ==# 'tjump' && l:buffer_file_path ==# expand('%:p')
       quit
       if s:output_style() ==# 'tabnew' | tabp | en
     endif
