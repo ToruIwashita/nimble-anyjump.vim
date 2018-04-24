@@ -90,7 +90,7 @@ fun! s:open_file(file_path,line_number)
   return 1
 endf
 
-fun! s:file_jump_by_cursor_file()
+fun! s:file_jump_by_cursor_word()
   let l:file_path = expand('<cfile>')
   let l:space_separated_keyword = expand('<cWORD>')
   let l:buffer_file_path_head = expand('%:p:h')
@@ -141,14 +141,16 @@ endf
 
 fun! nimble_anyjump#anyjump(cmd)
   let l:keyword = expand('<cword>')
+  let l:file_name = expand('<cfile>:t')
   let l:buffer_file_path = expand('%:p')
-  let l:taglist_length = len(taglist('^'.l:keyword.'$'))
+  let l:keyword_taglist_length = len(taglist('^'.l:keyword.'$'))
+  let l:file_name_taglist_length = len(taglist('^'.l:file_name.'$'))
 
-  if s:file_jump_by_cursor_file()
+  if s:file_jump_by_cursor_word()
     return 0
   endif
 
-  if l:taglist_length == 0
+  if l:keyword_taglist_length == 0 && l:file_name_taglist_length == 0
     if s:url_jump_by_cursor_line()
       return 1
     end
@@ -160,7 +162,14 @@ fun! nimble_anyjump#anyjump(cmd)
   execute ''.s:output_style()
 
   try
-    execute a:cmd.' '.l:keyword
+    if l:keyword_taglist_length != 0
+      execute a:cmd.' '.l:keyword
+    elseif l:file_name_taglist_length != 0
+      execute a:cmd.' '.l:file_name
+    else
+      throw 'failed to jump'
+    endif
+
     execute 'normal! '.s:after_jump()
   finally
     if a:cmd ==# 'tjump' && l:buffer_file_path == expand('%:p')
