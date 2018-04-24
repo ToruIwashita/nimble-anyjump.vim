@@ -93,7 +93,14 @@ endf
 fun! s:file_jump_by_cursor_file()
   let l:file_path = expand('<cfile>')
   let l:space_separated_keyword = expand('<cWORD>')
+  let l:buffer_file_path_head = expand('%:p:h')
   let l:after_colon_text = matchstr(expand(l:space_separated_keyword), expand(l:file_path).':\zs\([0-9]*\)\ze', 0)
+
+  if match(l:file_path, '^[/|\~]') == -1
+    let l:corrected_file_path = l:buffer_file_path_head.'/'.substitute(l:file_path, '^\./', '', '')
+  else
+    let l:corrected_file_path = l:file_path
+  endif
 
   if empty(l:after_colon_text)
     let l:line_number = 1
@@ -101,7 +108,7 @@ fun! s:file_jump_by_cursor_file()
     let l:line_number = l:after_colon_text
   endif
 
-  if !s:open_file(l:file_path, l:line_number)
+  if !s:open_file(l:corrected_file_path, l:line_number)
     return 0
   endif
 
@@ -110,7 +117,14 @@ endf
 
 fun! s:file_jump_by_specified_text(text)
   let l:file_path = matchstr(expand(a:text), '\zs\([^:]*\)\ze:\?')
+  let l:buffer_file_path_head = expand('%:p:h')
   let l:after_colon_text = matchstr(expand(a:text), ':\zs\([0-9]*\)\ze', 0)
+
+  if match(l:file_path, '^[/|\~]') == -1
+    let l:corrected_file_path = l:buffer_file_path_head.'/'.substitute(l:file_path, '^\./', '', '')
+  else
+    let l:corrected_file_path = l:file_path
+  endif
 
   if empty(l:after_colon_text)
     let l:line_number = 1
@@ -118,7 +132,7 @@ fun! s:file_jump_by_specified_text(text)
     let l:line_number = l:after_colon_text
   endif
 
-  if !s:open_file(l:file_path, l:line_number)
+  if !s:open_file(l:corrected_file_path, l:line_number)
     return 0
   endif
 
