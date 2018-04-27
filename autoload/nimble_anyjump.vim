@@ -90,10 +90,17 @@ fun! s:open_file(file_path,line_number)
   return 1
 endf
 
-fun! s:file_jump_by_cursor_file()
+fun! s:file_jump_by_cursor_word()
   let l:file_path = expand('<cfile>')
   let l:space_separated_keyword = expand('<cWORD>')
+  let l:buffer_file_path_head = expand('%:p:h')
   let l:after_colon_text = matchstr(expand(l:space_separated_keyword), expand(l:file_path).':\zs\([0-9]*\)\ze', 0)
+
+  if match(l:file_path, '^[/|\~]') == -1
+    let l:corrected_file_path = l:buffer_file_path_head.'/'.substitute(l:file_path, '^\./', '', '')
+  else
+    let l:corrected_file_path = l:file_path
+  endif
 
   if empty(l:after_colon_text)
     let l:line_number = 1
@@ -101,7 +108,7 @@ fun! s:file_jump_by_cursor_file()
     let l:line_number = l:after_colon_text
   endif
 
-  if !s:open_file(l:file_path, l:line_number)
+  if !s:open_file(l:corrected_file_path, l:line_number)
     return 0
   endif
 
@@ -110,7 +117,14 @@ endf
 
 fun! s:file_jump_by_specified_text(text)
   let l:file_path = matchstr(expand(a:text), '\zs\([^:]*\)\ze:\?')
+  let l:buffer_file_path_head = expand('%:p:h')
   let l:after_colon_text = matchstr(expand(a:text), ':\zs\([0-9]*\)\ze', 0)
+
+  if match(l:file_path, '^[/|\~]') == -1
+    let l:corrected_file_path = l:buffer_file_path_head.'/'.substitute(l:file_path, '^\./', '', '')
+  else
+    let l:corrected_file_path = l:file_path
+  endif
 
   if empty(l:after_colon_text)
     let l:line_number = 1
@@ -118,7 +132,7 @@ fun! s:file_jump_by_specified_text(text)
     let l:line_number = l:after_colon_text
   endif
 
-  if !s:open_file(l:file_path, l:line_number)
+  if !s:open_file(l:corrected_file_path, l:line_number)
     return 0
   endif
 
@@ -127,14 +141,16 @@ endf
 
 fun! nimble_anyjump#anyjump(cmd)
   let l:keyword = expand('<cword>')
-  let l:buffer_filepath = expand('%:p')
-  let l:taglist_length = len(taglist('^'.l:keyword.'$'))
+  let l:file_name = expand('<cfile>:t')
+  let l:buffer_file_path = expand('%:p')
+  let l:keyword_taglist_length = len(taglist('^'.l:keyword.'$'))
+  let l:file_name_taglist_length = len(taglist('^'.l:file_name.'$'))
 
-  if s:file_jump_by_cursor_file()
+  if s:file_jump_by_cursor_word()
     return 0
   endif
 
-  if l:taglist_length == 0
+  if l:keyword_taglist_length == 0 && l:file_name_taglist_length == 0
     if s:url_jump_by_cursor_line()
       return 1
     end
@@ -146,10 +162,17 @@ fun! nimble_anyjump#anyjump(cmd)
   execute ''.s:output_style()
 
   try
-    execute a:cmd.' '.l:keyword
+    if l:keyword_taglist_length != 0
+      execute a:cmd.' '.l:keyword
+    elseif l:file_name_taglist_length != 0
+      execute a:cmd.' '.l:file_name
+    else
+      throw 'failed to jump'
+    endif
+
     execute 'normal! '.s:after_jump()
   finally
-    if a:cmd ==# 'tjump' && l:buffer_filepath == expand('%:p')
+    if a:cmd ==# 'tjump' && l:buffer_file_path == expand('%:p')
       quit
       if s:output_style() ==# 'tabnew' | tabp | en
     endif
@@ -162,7 +185,7 @@ fun! nimble_anyjump#anyjump(cmd)
 endf
 
 fun! nimble_anyjump#anyjump_range(cmd) range
-  let l:buffer_filepath = expand('%:p')
+  let l:buffer_file_path = expand('%:p')
   let l:unnamed_register = @@
   silent! normal! gvy
   let l:selected_range = @@
@@ -197,7 +220,7 @@ fun! nimble_anyjump#anyjump_range(cmd) range
     execute a:cmd.' '.l:escapted_selected_range
     execute 'normal! '.s:after_jump()
   finally
-    if a:cmd ==# 'tjump' && l:buffer_filepath ==# expand('%:p')
+    if a:cmd ==# 'tjump' && l:buffer_file_path ==# expand('%:p')
       quit
       if s:output_style() ==# 'tabnew' | tabp | en
     endif

@@ -1,6 +1,6 @@
 *nimble-anyjump.txt*	タグジャンプ、ファイルやURLオープンを共通コマンドで行う
 
-Version: 1.0.0
+Version: 1.1.0
 Author: ToruIwashita <toru.iwashita@gmail.com>
 License: MIT License
 
@@ -21,6 +21,7 @@ License: MIT License
 
 *nimble-anyjump*はカーソル上の文字列やカーソルラインの文字列に応じて、
 タグジャンプ、ファイルオープン、ブラウザでのURLオープンを行うプラグインです。
+ctagsの'--extra = +f'オプションで生成されるファイル名のタグにも対応しています。
 
 ==============================================================================
 						*nimble-anyjump-interface*
