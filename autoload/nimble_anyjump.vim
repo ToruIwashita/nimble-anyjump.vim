@@ -43,16 +43,16 @@ fun! s:open_browser(url)
   endif
 
   if executable('open')
-    silent! execute '!open '.shellescape(a:url)
+    silent! execute '!open '.escape(shellescape(a:url), '#')
   elseif executable('xdg-open')
-    silent! execute '!xdg-open '.shellescape(a:url)
+    silent! execute '!xdg-open '.escape(shellescape(a:url), '#')
   endif
 
   return 1
 endf
 
 fun! s:url_jump_by_cursor_line()
-  let l:url = matchstr(getline('.'), '[a-z]*:\/\/[^ )\]}>,;:#]*')
+  let l:url = matchstr(getline('.'), '[a-z]*:\/\/[^ )\]}>,;:]*')
 
   if !s:open_browser(l:url)
     return 0
@@ -63,7 +63,7 @@ fun! s:url_jump_by_cursor_line()
 endf
 
 fun! s:url_jump_by_specified_text(text)
-  let l:url = matchstr(a:text, '[a-z]*:\/\/[^ )\]}>,;:#]*')
+  let l:url = matchstr(a:text, '[a-z]*:\/\/[^ )\]}>,;:]*')
 
   if !s:open_browser(l:url)
     return 0
