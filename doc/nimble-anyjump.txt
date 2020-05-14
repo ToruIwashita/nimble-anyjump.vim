@@ -1,6 +1,6 @@
 *nimble-anyjump.txt*	Perform tag jump, file or URL open with common command.
 
-Version: 1.2.0
+Version: 1.4.1
 Author: ToruIwashita <toru.iwashita@gmail.com>
 License: MIT License
 
