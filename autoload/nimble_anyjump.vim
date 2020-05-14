@@ -184,7 +184,7 @@ fun! nimble_anyjump#anyjump(cmd)
   endtry
 endf
 
-fun! nimble_anyjump#anyjump_range(cmd) range
+fun! nimble_anyjump#anyjump_range(cmd) abort range
   let l:buffer_file_path = expand('%:p')
   let l:unnamed_register = @@
   silent! normal! gvy
