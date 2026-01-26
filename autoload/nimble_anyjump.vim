@@ -51,6 +51,14 @@ fun! s:open_browser(url)
   return 1
 endf
 
+fun! s:parse_file_path_and_line(raw_path)
+  let l:match = matchlist(a:raw_path, '^\(.\{-}\):\(\d\+\)\%(-\d\+\)\?$')
+  if !empty(l:match) && !empty(l:match[1])
+    return [l:match[1], l:match[2]]
+  endif
+  return [a:raw_path, '']
+endf
+
 fun! s:url_jump_by_cursor_line()
   let l:url = matchstr(getline('.'), "[a-z]*:\\/\\/[^ )\\]}>,;'\"]*")
 
@@ -91,21 +99,29 @@ fun! s:open_file(file_path,line_number)
 endf
 
 fun! s:file_jump_by_cursor_word()
-  let l:file_path = expand('<cfile>')
+  let l:raw_cfile = expand('<cfile>')
   let l:space_separated_keyword = expand('<cWORD>')
   let l:buffer_file_path_head = expand('%:p:h')
-  let l:after_colon_text = matchstr(expand(l:space_separated_keyword), expand(l:file_path).':\zs\([0-9]*\)\ze', 0)
+  let [l:file_path, l:parsed_line] = s:parse_file_path_and_line(l:raw_cfile)
+  let l:after_colon_text = matchstr(l:space_separated_keyword, escape(l:file_path, '.\/').':\zs\(\d\+\)\ze\%(-\d\+\)\?', 0)
 
   if match(l:file_path, '^[/|\~]') == -1
-    let l:corrected_file_path = l:buffer_file_path_head.'/'.substitute(l:file_path, '^\./', '', '')
+    let l:buffer_relative = l:buffer_file_path_head.'/'.substitute(l:file_path, '^\./', '', '')
+    if filereadable(expand(l:buffer_relative))
+      let l:corrected_file_path = l:buffer_relative
+    else
+      let l:corrected_file_path = l:file_path
+    endif
   else
     let l:corrected_file_path = l:file_path
   endif
 
-  if empty(l:after_colon_text)
-    let l:line_number = 1
-  else
+  if !empty(l:after_colon_text)
     let l:line_number = l:after_colon_text
+  elseif !empty(l:parsed_line)
+    let l:line_number = l:parsed_line
+  else
+    let l:line_number = 1
   endif
 
   if !s:open_file(l:corrected_file_path, l:line_number)
@@ -116,12 +132,17 @@ fun! s:file_jump_by_cursor_word()
 endf
 
 fun! s:file_jump_by_specified_text(text)
-  let l:file_path = matchstr(expand(a:text), '\zs\([^:]*\)\ze:\?')
+  let l:file_path = matchstr(a:text, '\zs\([^:]*\)\ze:\?')
   let l:buffer_file_path_head = expand('%:p:h')
-  let l:after_colon_text = matchstr(expand(a:text), ':\zs\([0-9]*\)\ze', 0)
+  let l:after_colon_text = matchstr(a:text, ':\zs\(\d\+\)\ze\%(-\d\+\)\?', 0)
 
   if match(l:file_path, '^[/|\~]') == -1
-    let l:corrected_file_path = l:buffer_file_path_head.'/'.substitute(l:file_path, '^\./', '', '')
+    let l:buffer_relative = l:buffer_file_path_head.'/'.substitute(l:file_path, '^\./', '', '')
+    if filereadable(expand(l:buffer_relative))
+      let l:corrected_file_path = l:buffer_relative
+    else
+      let l:corrected_file_path = l:file_path
+    endif
   else
     let l:corrected_file_path = l:file_path
   endif
@@ -141,10 +162,11 @@ endf
 
 fun! nimble_anyjump#anyjump(cmd)
   let l:keyword = expand('<cword>')
-  let l:file_name = expand('<cfile>:t')
+  let [l:file_name, l:_] = s:parse_file_path_and_line(expand('<cfile>:t'))
   let l:buffer_file_path = expand('%:p')
   let l:keyword_taglist_length = len(taglist('^'.l:keyword.'$'))
   let l:file_name_taglist_length = len(taglist('^'.l:file_name.'$'))
+  let l:cword_line = matchstr(expand('<cWORD>'), ':\zs\(\d\+\)\ze\%(-\d\+\)\?', 0)
 
   if s:file_jump_by_cursor_word()
     return 0
@@ -166,6 +188,10 @@ fun! nimble_anyjump#anyjump(cmd)
       execute a:cmd.' '.l:keyword
     elseif l:file_name_taglist_length != 0
       execute a:cmd.' '.l:file_name
+
+      if !empty(l:cword_line)
+        execute 'normal! '.l:cword_line.'G'
+      endif
     else
       throw 'failed to jump'
     endif
@@ -199,7 +225,8 @@ fun! nimble_anyjump#anyjump_range(cmd) abort range
     let l:escapted_selected_range = l:selected_range
   endif
 
-  let l:taglist_length = len(taglist('^'.l:escapted_selected_range .'$'))
+  let [l:selected_tag_name, l:selected_line] = s:parse_file_path_and_line(l:escapted_selected_range)
+  let l:taglist_length = len(taglist('^'.l:selected_tag_name.'$'))
 
   if s:file_jump_by_specified_text(l:escapted_selected_range)
     return 0
@@ -217,7 +244,12 @@ fun! nimble_anyjump#anyjump_range(cmd) abort range
   execute s:output_style()
 
   try
-    execute a:cmd.' '.l:escapted_selected_range
+    execute a:cmd.' '.l:selected_tag_name
+
+    if !empty(l:selected_line)
+      execute 'normal! '.l:selected_line.'G'
+    endif
+
     execute 'normal! '.s:after_jump()
   finally
     if a:cmd ==# 'tjump' && l:buffer_file_path ==# expand('%:p')
