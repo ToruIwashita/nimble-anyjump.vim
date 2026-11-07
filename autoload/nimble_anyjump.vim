@@ -81,13 +81,25 @@ fun! s:url_jump_by_specified_text(text)
   return 1
 endf
 
+" 先頭の`~`のみをホームディレクトリへ展開する
+" expand()はバッククォート等をシェルコマンドとして実行するため,パスには使わない
+fun! s:expand_home(path)
+  if a:path ==# '~' || a:path[0:1] ==# '~/'
+    return expand('~').a:path[1:]
+  endif
+
+  return a:path
+endf
+
 fun! s:open_file(file_path,line_number)
-  if empty(a:file_path) || !filereadable(expand(a:file_path))
+  let l:resolved_file_path = s:expand_home(a:file_path)
+
+  if empty(a:file_path) || !filereadable(l:resolved_file_path)
     return 0
   endif
 
   execute ''.s:output_style()
-  execute 'e '.a:file_path
+  execute 'e '.fnameescape(l:resolved_file_path)
 
   if a:line_number
     execute 'normal! '.a:line_number.'G'
@@ -107,7 +119,7 @@ fun! s:file_jump_by_cursor_word()
 
   if match(l:file_path, '^[/|\~]') == -1
     let l:buffer_relative = l:buffer_file_path_head.'/'.substitute(l:file_path, '^\./', '', '')
-    if filereadable(expand(l:buffer_relative))
+    if filereadable(s:expand_home(l:buffer_relative))
       let l:corrected_file_path = l:buffer_relative
     else
       let l:corrected_file_path = l:file_path
@@ -138,7 +150,7 @@ fun! s:file_jump_by_specified_text(text)
 
   if match(l:file_path, '^[/|\~]') == -1
     let l:buffer_relative = l:buffer_file_path_head.'/'.substitute(l:file_path, '^\./', '', '')
-    if filereadable(expand(l:buffer_relative))
+    if filereadable(s:expand_home(l:buffer_relative))
       let l:corrected_file_path = l:buffer_relative
     else
       let l:corrected_file_path = l:file_path
